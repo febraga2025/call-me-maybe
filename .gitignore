@@ -1,0 +1,21 @@
+# --- Python Artifacts ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# --- Virtual Environments ---
+.venv/
+venv/
+env/
+
+# --- Typying e Linting ---
+.mypy_cache/
+.pytest_cache/
+
+# --- Pastas do Projeto ---
+data/output/
+
+# --- OS Artifacts ---
+.DS_Store
+Thumbs.db

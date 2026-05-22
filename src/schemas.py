@@ -24,15 +24,15 @@ class SquareRootParams(BaseModel):
 
 class SubstituteRegexParams(BaseModel):
     """Parametro para substituicao com regex"""
-    source_string: str = Field(max_lenght=100)
+    source_string: str = Field(max_length=100)
     regex: str = Field(max_length=100)
     replacement: str = Field(max_length=100)
 
 
 class FunctionCallResult(BaseModel):
     """Resultado final da chamada das funcoes do projeto"""
-    prompt: str = Field(min_lenght=1, max_length=500)
-    name: str = Field(min_lenght=1, max_length=100)
+    prompt: str = Field(min_length=1, max_length=500)
+    name: str = Field(min_length=1, max_length=100)
     parameters: Dict[str, Any]
 
     @field_validator('name')
