@@ -1,49 +1,37 @@
-from pydantic import BaseModel, Field, field_validator
-from typing import Any, Dict
+from pydantic import create_model
+from typing import Dict, Any, Type, List
 
-
-class AddNumbersParams(BaseModel):
-    """Parametro para funcao adicao"""
-    a: float
-    b: float
-
-
-class GreetParams(BaseModel):
-    """Paramentro para funcao de saudacao"""
-    name: str = Field(min_length=1, max_length=15)
-
-
-class ReverseStringParams(BaseModel):
-    """Parametro para  a funcao invert string"""
-    s: str = Field(min_length=1, max_length=15)
-
-
-class SquareRootParams(BaseModel):
-    a: float = Field(ge=0.0)
-
-
-class SubstituteRegexParams(BaseModel):
-    """Parametro para substituicao com regex"""
-    source_string: str = Field(max_length=100)
-    regex: str = Field(max_length=100)
-    replacement: str = Field(max_length=100)
-
-
-class FunctionCallResult(BaseModel):
-    """Resultado final da chamada das funcoes do projeto"""
-    prompt: str = Field(min_length=1, max_length=500)
-    name: str = Field(min_length=1, max_length=100)
-    parameters: Dict[str, Any]
-
-    @field_validator('name')
-    @classmethod
-    def validate_function_name(cls, v: str) -> str:
-        """Validacao das funcoes permitidas"""
-        allowed_functions = ["fn_add_numbers",
-                             "fn_greet",
-                             "fn_reverse_string",
-                             "fn_get_square_root",
-                             "fn_substitute_string_with_regex"]
-        if v not in allowed_functions:
-            raise ValueError(f"Function '{v}' not supported.")
-        return v
+def get_dynamic_validators(functions_definition: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Lê as definições do JSON e cria classes Pydantic dinamicamente.
+    
+    Garante que o código aceita qualquer função nova na revisão por pares.
+    
+    Args:
+        functions_definition (List[Dict[str, Any]]): Definições das funções.
+        
+    Returns:
+        Dict[str, Any]: Dicionário mapeando o nome da função para o validador.
+    """
+    type_mapping: Dict[str, Type[Any]] = {
+        "number": float,
+        "string": str,
+        "boolean": bool
+    }
+    
+    validators: Dict[str, Any] = {}
+    for func in functions_definition:
+        func_name = str(func.get("name", "UnknownFunction"))
+        parameters = func.get("parameters", {})
+        
+        fields: Dict[str, Any] = {}
+        for param_name, param_info in parameters.items():
+            tipo_json = param_info.get("type", "string")
+            tipo_python = type_mapping.get(tipo_json, str)
+            # Define o campo como obrigatório (...) e com o tipo correto
+            fields[param_name] = (tipo_python, ...)
+            
+        # Cria a classe Pydantic dinamicamente em tempo de execução
+        validators[func_name] = create_model(func_name, **fields)
+        
+    return validators

@@ -28,4 +28,5 @@ lint:
 	$(PYTHON) -m mypy --warn-return-any --warn-unused-ignores --ignore-missing-imports \
 		--disallow-untyped-defs --check-untyped-defs src
 
+
 .PHONY: all install run clean lint
