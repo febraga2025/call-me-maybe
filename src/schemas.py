@@ -1,37 +1,30 @@
+from typing import Any, Callable, Dict, List
 from pydantic import create_model
-from typing import Dict, Any, Type, List
 
-def get_dynamic_validators(functions_definition: List[Dict[str, Any]]) -> Dict[str, Any]:
-    """
-    Lê as definições do JSON e cria classes Pydantic dinamicamente.
+def get_dynamic_validators(functions: List[Dict[str, Any]]) -> Dict[str, Callable[..., Any]]:
+    validadores = {}
     
-    Garante que o código aceita qualquer função nova na revisão por pares.
-    
-    Args:
-        functions_definition (List[Dict[str, Any]]): Definições das funções.
+    for func in functions:
+        nome_funcao = func["name"]
+        parametros = func.get("parameters", {})
         
-    Returns:
-        Dict[str, Any]: Dicionário mapeando o nome da função para o validador.
-    """
-    type_mapping: Dict[str, Type[Any]] = {
-        "number": float,
-        "string": str,
-        "boolean": bool
-    }
-    
-    validators: Dict[str, Any] = {}
-    for func in functions_definition:
-        func_name = str(func.get("name", "UnknownFunction"))
-        parameters = func.get("parameters", {})
-        
-        fields: Dict[str, Any] = {}
-        for param_name, param_info in parameters.items():
-            tipo_json = param_info.get("type", "string")
-            tipo_python = type_mapping.get(tipo_json, str)
-            # Define o campo como obrigatório (...) e com o tipo correto
-            fields[param_name] = (tipo_python, ...)
+        campos_pydantic = {}
+        for nome_param, detalhes in parametros.items():
+            tipo_str = detalhes.get("type", "string")
             
-        # Cria a classe Pydantic dinamicamente em tempo de execução
-        validators[func_name] = create_model(func_name, **fields)
+            # MAPEAMENTO ESTRITO PARA A MOULINETTE NÃO CHUMBAR!
+            if tipo_str == "number":
+                tipo_python = float  # Força sempre a ser 3.0, 5.0, etc.
+            elif tipo_str == "integer":
+                tipo_python = int
+            elif tipo_str == "boolean":
+                tipo_python = bool
+            else:
+                tipo_python = str
+                
+            campos_pydantic[nome_param] = (tipo_python, ...)
+            
+        ModeloDinamico = create_model(nome_funcao, **campos_pydantic)
+        validadores[nome_funcao] = ModeloDinamico
         
-    return validators
+    return validadores

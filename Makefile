@@ -29,4 +29,4 @@ lint:
 		--disallow-untyped-defs --check-untyped-defs src
 
 
-.PHONY: all install run clean lint
+.PHONY: all install run clean lintz
