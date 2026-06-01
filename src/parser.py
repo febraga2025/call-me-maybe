@@ -3,7 +3,7 @@ from typing import List, Any, Dict
 
 
 def load_json_file(path: str) -> Any:
-    """Le um arquivo Json de forma robusta"""
+    """Read a JSON file robustly."""
     try:
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
@@ -16,13 +16,13 @@ def load_json_file(path: str) -> Any:
 
 
 def get_function_defini(path: str) -> List[Dict[str, Any]]:
-    """Return lista de definicoes"""
+    """Return list of function definitions."""
     data = load_json_file(path)
     return data if data is not None else []
 
 
 def get_prompts(path: str) -> List[str]:
-    """Extra apenas a lista de pronts par aprocessar"""
+    """Extract only the list of prompts to process."""
     data = load_json_file(path)
     if data:
         return [item['prompt'] for item in data]
